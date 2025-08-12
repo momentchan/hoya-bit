@@ -1,36 +1,22 @@
-import { CameraControls } from "@react-three/drei";
+import { CameraControls, useGLTF, MeshTransmissionMaterial } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
-import { useRef, useEffect } from 'react'
 import Utilities from "../r3f-gist/utility/Utilities";
-import { CustomShaderMaterial } from "../r3f-gist/shader/CustomShaderMaterial";
-import fragmentShader from "../shader/test/fragment.glsl";
-import { useControls } from 'leva'
+import HoyaModel from "./HoyaModel";
+import { Environment } from "@react-three/drei";
+import { useTexture } from '@react-three/drei'
+import { Lightformer } from "@react-three/drei";
+import { EffectComposer, Vignette, Bloom } from '@react-three/postprocessing'
 
-function BasicMesh() {
-    const materialRef = useRef()
-
-    const { alpha } = useControls('Torus Material', {
-        alpha: {
-            value: 0.5,
-            min: 0,
-            max: 1,
-            step: 0.01
-        }
-    })
-
-    return (
-        <mesh>
-            <planeGeometry args={[2, 2]} />
-            <CustomShaderMaterial
-                ref={materialRef}
-                fragmentShader={fragmentShader}
-                uniforms={{ uAlpha: alpha,
-                }}
-                transparent={true}
-                side={2}
-            />
-        </mesh>
-    )
+function TexturedPlane() {
+  // You can replace this with your own texture path
+  const texture = useTexture('/texture.png') // or any texture file you have
+  
+  return (
+    <mesh position={[0, -1, 0]} rotation={[0, 0, 0]} receiveShadow>
+      <planeGeometry args={[2, 1]} />
+      <meshStandardMaterial map={texture} />
+    </mesh>
+  )
 }
 
 export default function App() {
@@ -41,13 +27,35 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [4, 2, 6]
+                position: [0, 0, 2]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            <CameraControls makeDefault />
-            <BasicMesh />
+            {/* <color attach="background" args={['#ffffff']} /> */}
+            {/* <CameraControls makeDefault /> */}
+            {/* <ambientLight intensity={0.5} /> */}
+            {/* <directionalLight castShadow intensity={0.6} position={[0, 0, 10]} />    */}
+            <HoyaModel />
+            {/* <TexturedPlane /> */}
             <Utilities />
+            <ambientLight intensity={0.5} />
+            <Environment resolution={256}>
+                <group rotation={[-Math.PI / 2, 0, 0]}>
+                    <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
+                    {[2, 0, 2, 0, 2, 0, 2, 0].map((x, i) => (
+                        <Lightformer key={i} form="circle" intensity={4} rotation={[Math.PI / 2, 0, 0]} position={[x, 4, i * 4]} scale={[4, 1, 1]} />
+                    ))}
+                    <Lightformer intensity={1} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[50, 2, 1]} />
+                    <Lightformer intensity={1} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={[50, 2, 1]} />
+                    <Lightformer intensity={1} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[50, 2, 1]} />
+                </group>
+            </Environment>
+
+            <EffectComposer>
+                <Vignette />
+                <Bloom intensity={2} threshold={0} />
+            </EffectComposer>
+
         </Canvas>
     </>
 }
