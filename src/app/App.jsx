@@ -5,18 +5,20 @@ import HoyaModel from "./HoyaModel";
 import { Environment } from "@react-three/drei";
 import { useTexture } from '@react-three/drei'
 import { Lightformer } from "@react-three/drei";
-import { EffectComposer, Vignette, Bloom } from '@react-three/postprocessing'
+import { EffectComposer, Vignette, Bloom, ToneMapping, DepthOfField } from '@react-three/postprocessing'
+import { ToneMappingMode } from 'postprocessing'
+
 
 function TexturedPlane() {
-  // You can replace this with your own texture path
-  const texture = useTexture('/texture.png') // or any texture file you have
-  
-  return (
-    <mesh position={[0, -1, 0]} rotation={[0, 0, 0]} receiveShadow>
-      <planeGeometry args={[2, 1]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
-  )
+    // You can replace this with your own texture path
+    const texture = useTexture('/texture.png') // or any texture file you have
+
+    return (
+        <mesh position={[0, -1, 0]} rotation={[0, 0, 0]} receiveShadow>
+            <planeGeometry args={[2, 1]} />
+            <meshStandardMaterial map={texture} />
+        </mesh>
+    )
 }
 
 export default function App() {
@@ -52,8 +54,15 @@ export default function App() {
             </Environment>
 
             <EffectComposer>
-                <Vignette />
+                {/* <Vignette /> */}
                 <Bloom intensity={2} threshold={0} />
+                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+                {/* <DepthOfField
+                    focusDistance={0.01}
+                    focalLength={0.02}
+                    bokehScale={2}
+                /> */}
+                {/* <Bloom intensity={2} luminanceThreshold={0} luminanceSmoothing={0.1} /> */}
             </EffectComposer>
 
         </Canvas>
