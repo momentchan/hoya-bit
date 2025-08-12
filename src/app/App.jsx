@@ -1,46 +1,60 @@
-import { CameraControls, useGLTF, MeshTransmissionMaterial } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "../r3f-gist/utility/Utilities";
 import HoyaModel from "./HoyaModel";
-import { Environment } from "@react-three/drei";
+import { CameraControls, Environment } from "@react-three/drei";
 import { useTexture } from '@react-three/drei'
 import { Lightformer } from "@react-three/drei";
-import { EffectComposer, Vignette, Bloom, ToneMapping, DepthOfField } from '@react-three/postprocessing'
-import { ToneMappingMode } from 'postprocessing'
+import BgGradient from "./BgGradient";
+import { useEffect } from "react";
+import { useState } from "react";
+import Effect from "./Effect";
+import * as THREE from 'three'
 
-
-function TexturedPlane() {
-    // You can replace this with your own texture path
-    const texture = useTexture('/texture.png') // or any texture file you have
-
-    return (
-        <mesh position={[0, -1, 0]} rotation={[0, 0, 0]} receiveShadow>
-            <planeGeometry args={[2, 1]} />
-            <meshStandardMaterial map={texture} />
-        </mesh>
-    )
+const Background = () => {
+    const backgroundTexture = useTexture('/bgcolor.jpg')
+    return <primitive attach="background" object={backgroundTexture} />
 }
 
 export default function App() {
+    const [pointer, setPointer] = useState({ x: 0, y: 0 })
+
+    useEffect(() => {
+        const handleMove = (e) => {
+            const nx = (e.clientX / window.innerWidth) * 2 - 1
+            const ny = -(e.clientY / window.innerHeight) * 2 + 1
+            setPointer({ x: nx, y: ny })
+        }
+        window.addEventListener('pointermove', handleMove)
+        return () => window.removeEventListener('pointermove', handleMove)
+    }, [])
+
+    
+
     return <>
         <Canvas
-            shadows
+            shadows={{ type: THREE.PCFSoftShadowMap }}
             camera={{
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [0, 0, 2]
+                position: [0,0, 2]
             }}
-            gl={{ preserveDrawingBuffer: true }}
+            gl={{ preserveDrawingBuffer: true, antialias: true }}
         >
-            {/* <color attach="background" args={['#ffffff']} /> */}
-            {/* <CameraControls makeDefault /> */}
-            {/* <ambientLight intensity={0.5} /> */}
-            {/* <directionalLight castShadow intensity={0.6} position={[0, 0, 10]} />    */}
-            <HoyaModel />
-            {/* <TexturedPlane /> */}
+            {/* <CameraControls /> */}
+            <BgGradient pointer={pointer} />
+
+            <directionalLight
+                castShadow position={[-0.5, 0.5, 0.5]} intensity={0}
+                shadow-mapSize-width={2048} // 提高解析度
+                shadow-mapSize-height={2048}
+                shadow-radius={0.5}           // 陰影模糊半徑
+                shadow-bias={-0.0001}       // 修正陰影接縫
+
+            />
+            <HoyaModel pointer={pointer} />
             <Utilities />
-            <ambientLight intensity={0.5} />
+            <ambientLight intensity={0.25} />
             <Environment resolution={256}>
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Lightformer intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
@@ -53,17 +67,8 @@ export default function App() {
                 </group>
             </Environment>
 
-            <EffectComposer>
-                {/* <Vignette /> */}
-                <Bloom intensity={2} threshold={0} />
-                <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-                {/* <DepthOfField
-                    focusDistance={0.01}
-                    focalLength={0.02}
-                    bokehScale={2}
-                /> */}
-                {/* <Bloom intensity={2} luminanceThreshold={0} luminanceSmoothing={0.1} /> */}
-            </EffectComposer>
+
+            <Effect />
 
         </Canvas>
     </>

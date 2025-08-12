@@ -1,31 +1,19 @@
-import { useGLTF, MeshTransmissionMaterial } from '@react-three/drei'
+import { useGLTF, MeshTransmissionMaterial, ContactShadows } from '@react-three/drei'
 import { Float } from '@react-three/drei'
 import { useControls } from 'leva'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MathUtils } from 'three'
-import { useState, useRef, useEffect, use } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useLoader } from '@react-three/fiber'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
 
-export default function HoyaModel(props) {
-  const texture = useLoader(RGBELoader, 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/aerodynamics_workshop_1k.hdr')
+export default function HoyaModel({ props, pointer }) {
+  const texture = useLoader(RGBELoader, '/aerodynamics_workshop_1k.hdr')
 
   const { scene } = useGLTF('/Hoya.gltf')
-  const [pointer, setPointer] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
   const { camera } = useThree()
-
-  useEffect(() => {
-    const handleMove = (e) => {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1
-      const ny = -(e.clientY / window.innerHeight) * 2 + 1
-      setPointer({ x: nx, y: ny })
-    }
-    window.addEventListener('pointermove', handleMove)
-    return () => window.removeEventListener('pointermove', handleMove)
-  }, [])
-
 
   const meshRef = useRef()
   const config = useControls('Glass', {
@@ -41,15 +29,14 @@ export default function HoyaModel(props) {
     ior: { value: 1.5, min: 1, max: 5, step: 0.01 },
     chromaticAberration: { value: 1, min: 0, max: 1 },
     anisotropy: { value: 1, min: 0, max: 10, step: 0.01 },
-    distortion: { value: 0.1, min: 0, max: 1, step: 0.01 },
+    distortion: { value: 0.7, min: 0, max: 1, step: 0.01 },
     distortionScale: { value: 1, min: 0.01, max: 1, step: 0.01 },
-    temporalDistortion: { value: 0.5, min: 0, max: 1, step: 0.01 },
+    temporalDistortion: { value: 0.1, min: 0, max: 1, step: 0.01 },
     attenuationDistance: { value: 0.5, min: 0, max: 10, step: 0.01 },
     attenuationColor: '#ffffff',
     color: '#ffffff',
   })
 
-  // Extract all meshes dynamically
   const meshes = []
   scene.traverse((child) => {
     if (child.isMesh) {
@@ -61,13 +48,12 @@ export default function HoyaModel(props) {
   const raycasterRef = useRef(new THREE.Raycaster())
 
   const groupRef = useRef()
-
   const transmissionRef = useRef(0)
 
   useFrame((state, delta) => {
-    const targetX = pointer.y * Math.PI * 0.25
-    const targetY = pointer.x * Math.PI * 0.25
-    const targetZ = (pointer.x - pointer.y) * Math.PI * 0.25
+    const targetX = pointer.y;
+    const targetY = 0;
+    const targetZ = pointer.x * Math.PI * 0.25
 
     meshRef.current.rotation.x = MathUtils.lerp(meshRef.current.rotation.x, targetX, 0.1)
     meshRef.current.rotation.y = MathUtils.lerp(meshRef.current.rotation.y, targetY, 0.1)
@@ -80,7 +66,6 @@ export default function HoyaModel(props) {
 
 
     const target = isIntersecting ? 0.5 : 0
-    // delta = time since last frame, 0.5 factor ≈ 2 second fade
     transmissionRef.current = MathUtils.lerp(
       transmissionRef.current,
       target,
@@ -93,28 +78,34 @@ export default function HoyaModel(props) {
   }, [isIntersecting])
 
   return (
-    <Float floatIntensity={0.5} rotationIntensity={0} speed={2}>
-      <group ref={groupRef} {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 1, 0]}>
-        {meshes.map((mesh, i) => (
-          <Float key={i} floatIntensity={0} rotationIntensity={0}>
-            <mesh
-              ref={meshRef}
-              geometry={mesh.geometry}
-              position={mesh.position}
-              scale={mesh.scale}
-              rotation={[rotation.x, rotation.y, rotation.z]}
-              castShadow
-              receiveShadow
-            >
-              <MeshTransmissionMaterial {...config}
-                // transmission={transmissionRef.current}
-                toneMapped={false}
-                background={texture}
-              />
-            </mesh>
-          </Float>
-        ))}
-      </group>
-    </Float>
+    <>
+      <Float floatIntensity={1} rotationIntensity={0} speed={2}>
+        <group ref={groupRef} {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 1, 0]}>
+          {meshes.map((mesh, i) => (
+            <Float key={i} floatIntensity={0} rotationIntensity={0}>
+              <mesh
+                ref={meshRef}
+                geometry={mesh.geometry}
+                position={mesh.position}
+                scale={mesh.scale}
+                rotation={[rotation.x, rotation.y, rotation.z]}
+                castShadow
+                receiveShadow
+              >
+                <MeshTransmissionMaterial {...config}
+                  toneMapped={false}
+                  background={texture}
+                />
+              </mesh>
+            </Float>
+          ))}
+        </group>
+      </Float>
+
+      <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[10, 10]} />
+        <shadowMaterial transparent opacity={0.05} />
+      </mesh>
+    </>
   )
 }
