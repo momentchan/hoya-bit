@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import Effect from "./Effect";
 import * as THREE from 'three'
+import BackgroundFullScreen from './BackgroundFullScreen'
 
 const Background = () => {
     const backgroundTexture = useTexture('/bgcolor.jpg')
@@ -28,7 +29,7 @@ export default function App() {
         return () => window.removeEventListener('pointermove', handleMove)
     }, [])
 
-    
+
 
     return <>
         <Canvas
@@ -37,12 +38,14 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [0,0, 2]
+                position: [0, 0, 2]
             }}
-            gl={{ preserveDrawingBuffer: true, antialias: true }}
+            gl={{ preserveDrawingBuffer: true, antialias: true, alpha: true }} style={{ background: 'transparent' }}
         >
+            {/* <color attach="background" args={['#ff0000']} /> */}
             {/* <CameraControls /> */}
-            <BgGradient pointer={pointer} />
+            {/* <BgGradient pointer={pointer} /> */}
+            <BackgroundFullScreen />
 
             <directionalLight
                 castShadow position={[-0.5, 0.5, 0.5]} intensity={0}
@@ -69,6 +72,21 @@ export default function App() {
 
 
             <Effect />
+
+        </Canvas>
+
+        <Canvas
+            camera={{
+                fov: 45,
+                near: 0.1,
+                far: 200,
+                position: [0, 0, 2]
+            }}
+            className="canvas-bg" gl={{ alpha: false }} style={{ zIndex: -1 }}>
+            <mesh>
+                <planeGeometry args={[10, 10]} />
+                <meshBasicMaterial color="red" />
+            </mesh>
 
         </Canvas>
     </>

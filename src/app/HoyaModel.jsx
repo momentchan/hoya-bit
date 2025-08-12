@@ -20,7 +20,7 @@ export default function HoyaModel({ props, pointer }) {
     backside: false,
     samples: { value: 16, min: 1, max: 32, step: 1 },
     resolution: { value: 512, min: 64, max: 2048, step: 64 },
-    transmission: { value: 0.5, min: 0, max: 1 },
+    transmission: { value: 1, min: 0, max: 1 },
     roughness: { value: 0.15, min: 0, max: 1, step: 0.01 },
     clearcoat: { value: 0.1, min: 0, max: 1, step: 0.01 },
     clearcoatRoughness: { value: 0.1, min: 0, max: 1, step: 0.01 },
@@ -94,7 +94,8 @@ export default function HoyaModel({ props, pointer }) {
               >
                 <MeshTransmissionMaterial {...config}
                   toneMapped={false}
-                  background={texture}
+                  side={THREE.DoubleSide}
+                  // background={texture}
                 />
               </mesh>
             </Float>
