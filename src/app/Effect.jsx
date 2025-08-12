@@ -1,4 +1,4 @@
-import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing'
+import { EffectComposer, Bloom, ToneMapping, DepthOfField } from '@react-three/postprocessing'
 import { ToneMappingMode } from 'postprocessing'
 import { useControls } from 'leva'
 
