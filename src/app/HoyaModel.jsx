@@ -4,7 +4,7 @@ import { useControls } from 'leva'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MathUtils } from 'three'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react'
 
 // Utility functions
 const smooth5 = (x) => x * x * x * (x * (x * 6 - 15) + 10)
@@ -39,7 +39,7 @@ const useGlassConfig = () => {
 }
 
 // Custom hook for model rotation logic
-const useModelRotation = (pointer) => {
+const useModelAnimation = (pointer) => {
   const meshRef = useRef()
   const spinAngleZ = useRef(0)
   const [backsideOn, setBacksideOn] = useState(false)
@@ -56,22 +56,24 @@ const useModelRotation = (pointer) => {
     const ptrY = 0
     const ptrZ = pointer.x * Math.PI * 0.25
 
-    const totalSpinAngle = Math.PI * 2
-    const spinSpeed = Math.PI * 4
-    const fadeAngle = Math.PI * 2
+    const TOTAL_SPIN_ANGLE = Math.PI * 2
+    const SPIN_SPEED = Math.PI * 4
+    const FADE_ANGLE = Math.PI * 2
 
-    if (Math.abs(spinAngleZ.current) < totalSpinAngle) {
+    if (Math.abs(spinAngleZ.current) < TOTAL_SPIN_ANGLE) {
       // Initial spin phase
-      const remaining = totalSpinAngle - Math.abs(spinAngleZ.current)
-      const progress = 1 - remaining / totalSpinAngle
+      const remaining = TOTAL_SPIN_ANGLE - Math.abs(spinAngleZ.current)
+      const progress = 1 - remaining / TOTAL_SPIN_ANGLE
       const ease = Math.max(0.05, 1 - Math.pow(progress, 1.5))
 
-      spinAngleZ.current -= spinSpeed * delta * ease
+      // Spin
+      spinAngleZ.current -= SPIN_SPEED * delta * ease
 
+      // Fade-in weight
       let w = 0
-      if (spinAngleZ.current > totalSpinAngle - fadeAngle) {
-        const start = totalSpinAngle - fadeAngle
-        const norm = (spinAngleZ.current - start) / fadeAngle
+      if (spinAngleZ.current > TOTAL_SPIN_ANGLE - FADE_ANGLE) {
+        const start = TOTAL_SPIN_ANGLE - FADE_ANGLE
+        const norm = (spinAngleZ.current - start) / FADE_ANGLE
         w = smooth5(Math.min(Math.max(norm, 0), 1))
       }
 
@@ -85,6 +87,10 @@ const useModelRotation = (pointer) => {
       meshRef.current.rotation.y = THREE.MathUtils.damp(
         meshRef.current.rotation.y, ptrY, 4, delta * (0.5 + w * 0.5)
       )
+
+      const t = smooth5(progress)
+      meshRef.current.scale.set(t, t, t)
+
     } else {
       // Normal pointer following phase
       meshRef.current.rotation.x = THREE.MathUtils.damp(
@@ -93,7 +99,7 @@ const useModelRotation = (pointer) => {
       meshRef.current.rotation.y = THREE.MathUtils.damp(
         meshRef.current.rotation.y, ptrY, 6, delta
       )
-      
+
       const shortestTarget = meshRef.current.rotation.z +
         ((((ptrZ - meshRef.current.rotation.z) % (Math.PI * 2)) + 3 * Math.PI) % (Math.PI * 2) - Math.PI)
 
@@ -121,11 +127,11 @@ const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
       ref={meshRef}
       geometry={mesh.geometry}
       position={mesh.position}
-      scale={mesh.scale}
+      // scale={mesh.scale}
       castShadow
       receiveShadow
     >
-      <MeshTransmissionMaterial 
+      <MeshTransmissionMaterial
         {...config}
         toneMapped={false}
         backside={backsideOn}
@@ -137,15 +143,15 @@ const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
 export default function HoyaModel({ props, pointer }) {
   const { scene } = useGLTF('/Hoya.gltf')
   const glassConfig = useGlassConfig()
-  const { meshRef, backsideOn } = useModelRotation(pointer)
-
   // Extract meshes from the loaded scene
-  const meshes = []
-  scene.traverse((child) => {
-    if (child.isMesh) {
-      meshes.push(child)
-    }
-  })
+  const meshes = useMemo(() => {
+    const arr = []
+    scene.traverse((child) => { if (child.isMesh) arr.push(child) })
+    return arr
+  }, [scene])
+
+  const { meshRef, backsideOn } = useModelAnimation(pointer)
+
 
   return (
     <>
