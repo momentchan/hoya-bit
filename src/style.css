@@ -106,6 +106,7 @@ body {
     padding: 6px 4px;
     border-radius: 8px;
     text-decoration: none;
+    color: white;
 }
 
 .nav-item:hover {

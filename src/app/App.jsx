@@ -1,12 +1,13 @@
 import { Canvas } from '@react-three/fiber'
 import Utilities from "../r3f-gist/utility/Utilities";
 import HoyaModel from "./HoyaModel";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useState } from "react";
 import Effect from "./Effect";
 import * as THREE from 'three'
 import BackgroundFullScreen from './BackgroundFullScreen'
 import EnvironmentSetup from './EnvironmentSetup'
+import LevaWraper from '../r3f-gist/utility/LevaWraper'
 
 export default function App() {
     const [pointer, setPointer] = useState({ x: 0, y: 0 })
@@ -22,6 +23,9 @@ export default function App() {
     }, [])
 
     return <>
+        <LevaWraper defaultHidden={true} />
+
+        
         <Canvas
             shadows={{ type: THREE.PCFSoftShadowMap }}
             camera={{
@@ -32,14 +36,13 @@ export default function App() {
             }}
             gl={{ preserveDrawingBuffer: true, antialias: true, alpha: true }} style={{ background: 'transparent' }}
         >
-
-
-            <Utilities />
-            <HoyaModel pointer={pointer} />
-            <EnvironmentSetup />    
-            
-            <BackgroundFullScreen />
-            <Effect />
+            <Suspense fallback={null}>
+                <Utilities />
+                <HoyaModel pointer={pointer} />
+                <EnvironmentSetup />
+                <BackgroundFullScreen />
+                <Effect />
+            </Suspense>
         </Canvas>
     </>
 }

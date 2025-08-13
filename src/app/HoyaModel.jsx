@@ -6,23 +6,18 @@ import * as THREE from 'three'
 import { MathUtils } from 'three'
 import { useState, useRef, useEffect } from 'react'
 
+// Utility functions
+const smooth5 = (x) => x * x * x * (x * (x * 6 - 15) + 10)
 
-export default function HoyaModel({ props, pointer }) {
+const lerpAngle = (a, b, t) => {
+  const diff = ((((b - a) % Math.PI * 2) + 3 * Math.PI) % Math.PI * 2) - Math.PI
+  const smoothT = smooth5(t)
+  return a + diff * smoothT
+}
 
-  const { scene } = useGLTF('/Hoya.gltf')
-  const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
-  const { camera } = useThree()
-
-
-  const [backsideOn, setBacksideOn] = useState(false)
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setBacksideOn(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
-
-  const meshRef = useRef()
-  const config = useControls('Glass', {
+// Custom hook for glass material configuration
+const useGlassConfig = () => {
+  return useControls('Glass', {
     samples: { value: 16, min: 1, max: 32, step: 1 },
     resolution: { value: 512, min: 64, max: 2048, step: 64 },
     transmission: { value: 1, min: 0, max: 1 },
@@ -41,7 +36,110 @@ export default function HoyaModel({ props, pointer }) {
     attenuationColor: '#ffffff',
     color: '#ffffff',
   })
+}
 
+// Custom hook for model rotation logic
+const useModelRotation = (pointer) => {
+  const meshRef = useRef()
+  const spinAngleZ = useRef(0)
+  const [backsideOn, setBacksideOn] = useState(false)
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setBacksideOn(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
+  useFrame((state, delta) => {
+    if (!meshRef.current) return
+
+    const ptrX = pointer.y
+    const ptrY = 0
+    const ptrZ = pointer.x * Math.PI * 0.25
+
+    const totalSpinAngle = Math.PI * 2
+    const spinSpeed = Math.PI * 4
+    const fadeAngle = Math.PI * 2
+
+    if (Math.abs(spinAngleZ.current) < totalSpinAngle) {
+      // Initial spin phase
+      const remaining = totalSpinAngle - Math.abs(spinAngleZ.current)
+      const progress = 1 - remaining / totalSpinAngle
+      const ease = Math.max(0.05, 1 - Math.pow(progress, 1.5))
+
+      spinAngleZ.current -= spinSpeed * delta * ease
+
+      let w = 0
+      if (spinAngleZ.current > totalSpinAngle - fadeAngle) {
+        const start = totalSpinAngle - fadeAngle
+        const norm = (spinAngleZ.current - start) / fadeAngle
+        w = smooth5(Math.min(Math.max(norm, 0), 1))
+      }
+
+      const zFromSpin = spinAngleZ.current
+      const zBlended = lerpAngle(zFromSpin, ptrZ, w)
+      meshRef.current.rotation.z = zBlended
+
+      meshRef.current.rotation.x = THREE.MathUtils.damp(
+        meshRef.current.rotation.x, ptrX, 4, delta * (0.5 + w * 0.5)
+      )
+      meshRef.current.rotation.y = THREE.MathUtils.damp(
+        meshRef.current.rotation.y, ptrY, 4, delta * (0.5 + w * 0.5)
+      )
+    } else {
+      // Normal pointer following phase
+      meshRef.current.rotation.x = THREE.MathUtils.damp(
+        meshRef.current.rotation.x, ptrX, 6, delta
+      )
+      meshRef.current.rotation.y = THREE.MathUtils.damp(
+        meshRef.current.rotation.y, ptrY, 6, delta
+      )
+      
+      const shortestTarget = meshRef.current.rotation.z +
+        ((((ptrZ - meshRef.current.rotation.z) % (Math.PI * 2)) + 3 * Math.PI) % (Math.PI * 2) - Math.PI)
+
+      meshRef.current.rotation.z = THREE.MathUtils.damp(
+        meshRef.current.rotation.z, shortestTarget, 6, delta
+      )
+    }
+  })
+
+  return { meshRef, backsideOn }
+}
+
+// Component for the shadow plane
+const ShadowPlane = () => (
+  <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+    <planeGeometry args={[10, 10]} />
+    <shadowMaterial transparent opacity={0.1} />
+  </mesh>
+)
+
+// Component for individual mesh with glass material
+const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
+  <Float floatIntensity={0} rotationIntensity={0}>
+    <mesh
+      ref={meshRef}
+      geometry={mesh.geometry}
+      position={mesh.position}
+      scale={mesh.scale}
+      castShadow
+      receiveShadow
+    >
+      <MeshTransmissionMaterial 
+        {...config}
+        toneMapped={false}
+        backside={backsideOn}
+      />
+    </mesh>
+  </Float>
+)
+
+export default function HoyaModel({ props, pointer }) {
+  const { scene } = useGLTF('/Hoya.gltf')
+  const glassConfig = useGlassConfig()
+  const { meshRef, backsideOn } = useModelRotation(pointer)
+
+  // Extract meshes from the loaded scene
   const meshes = []
   scene.traverse((child) => {
     if (child.isMesh) {
@@ -49,68 +147,22 @@ export default function HoyaModel({ props, pointer }) {
     }
   })
 
-  const [isIntersecting, setIsIntersecting] = useState(false)
-  const raycasterRef = useRef(new THREE.Raycaster())
-
-  const groupRef = useRef()
-  const transmissionRef = useRef(0)
-
-  useFrame((state, delta) => {
-    const targetX = pointer.y;
-    const targetY = 0;
-    const targetZ = pointer.x * Math.PI * 0.25
-
-    meshRef.current.rotation.x = MathUtils.lerp(meshRef.current.rotation.x, targetX, 0.1)
-    meshRef.current.rotation.y = MathUtils.lerp(meshRef.current.rotation.y, targetY, 0.1)
-    meshRef.current.rotation.z = MathUtils.lerp(meshRef.current.rotation.z, targetZ, 0.1)
-
-    const rc = raycasterRef.current
-    rc.setFromCamera(pointer, camera)
-    const hits = rc.intersectObjects(meshes, true)
-    setIsIntersecting(hits.length > 0)
-
-
-    const target = isIntersecting ? 0.5 : 0
-    transmissionRef.current = MathUtils.lerp(
-      transmissionRef.current,
-      target,
-      delta * 10
-    )
-  })
-
-
-  useEffect(() => {
-  }, [isIntersecting])
-
   return (
     <>
       <Float floatIntensity={1} rotationIntensity={0} speed={2}>
-        <group ref={groupRef} {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 1, 0]}>
+        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 1, 0]}>
           {meshes.map((mesh, i) => (
-            <Float key={i} floatIntensity={0} rotationIntensity={0}>
-              <mesh
-                ref={meshRef}
-                geometry={mesh.geometry}
-                position={mesh.position}
-                scale={mesh.scale}
-                rotation={[rotation.x, rotation.y, rotation.z]}
-                castShadow
-                receiveShadow
-              >
-                <MeshTransmissionMaterial {...config}
-                  toneMapped={false}
-                  backside={backsideOn}
-                />
-              </mesh>
-            </Float>
+            <GlassMesh
+              key={i}
+              mesh={mesh}
+              config={glassConfig}
+              backsideOn={backsideOn}
+              meshRef={meshRef}
+            />
           ))}
         </group>
       </Float>
-
-      <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
-        <planeGeometry args={[10, 10]} />
-        <shadowMaterial transparent opacity={0.1} />
-      </mesh>
+      <ShadowPlane />
     </>
   )
 }
