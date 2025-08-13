@@ -4,17 +4,11 @@ import HoyaModel from "./HoyaModel";
 import { CameraControls, Environment } from "@react-three/drei";
 import { useTexture } from '@react-three/drei'
 import { Lightformer } from "@react-three/drei";
-import BgGradient from "./BgGradient";
 import { useEffect } from "react";
 import { useState } from "react";
 import Effect from "./Effect";
 import * as THREE from 'three'
 import BackgroundFullScreen from './BackgroundFullScreen'
-
-const Background = () => {
-    const backgroundTexture = useTexture('/bgcolor.jpg')
-    return <primitive attach="background" object={backgroundTexture} />
-}
 
 export default function App() {
     const [pointer, setPointer] = useState({ x: 0, y: 0 })
@@ -42,11 +36,6 @@ export default function App() {
             }}
             gl={{ preserveDrawingBuffer: true, antialias: true, alpha: true }} style={{ background: 'transparent' }}
         >
-            {/* <color attach="background" args={['#ff0000']} /> */}
-            {/* <CameraControls /> */}
-            {/* <BgGradient pointer={pointer} /> */}
-            <BackgroundFullScreen />
-
             <directionalLight
                 castShadow position={[-0.5, 0.5, 0.5]} intensity={0}
                 shadow-mapSize-width={2048} // 提高解析度
@@ -69,25 +58,8 @@ export default function App() {
                     <Lightformer intensity={1} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[50, 2, 1]} />
                 </group>
             </Environment>
-
-
+            <BackgroundFullScreen />
             <Effect />
-
-        </Canvas>
-
-        <Canvas
-            camera={{
-                fov: 45,
-                near: 0.1,
-                far: 200,
-                position: [0, 0, 2]
-            }}
-            className="canvas-bg" gl={{ alpha: false }} style={{ zIndex: -1 }}>
-            <mesh>
-                <planeGeometry args={[10, 10]} />
-                <meshBasicMaterial color="red" />
-            </mesh>
-
         </Canvas>
     </>
 }

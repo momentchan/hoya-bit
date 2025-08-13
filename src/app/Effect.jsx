@@ -15,7 +15,7 @@ export default function Effect() {
             <Bloom intensity={bloomIntensity}
                 luminanceThreshold={bloomThreshold}
                 luminanceSmoothing={bloomSmoothing} />
-            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+            {/* <ToneMapping mode={ToneMappingMode.ACES_FILMIC} /> */}
         </EffectComposer>
     )
 }

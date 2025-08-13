@@ -95,7 +95,6 @@ export default function HoyaModel({ props, pointer }) {
                 <MeshTransmissionMaterial {...config}
                   toneMapped={false}
                   side={THREE.DoubleSide}
-                  // background={texture}
                 />
               </mesh>
             </Float>
@@ -105,7 +104,7 @@ export default function HoyaModel({ props, pointer }) {
 
       <mesh rotation={[-Math.PI * 0.5, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
         <planeGeometry args={[10, 10]} />
-        <shadowMaterial transparent opacity={0.05} />
+        <shadowMaterial transparent opacity={0.1} />
       </mesh>
     </>
   )

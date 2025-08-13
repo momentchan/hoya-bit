@@ -40,35 +40,6 @@ body {
     margin: 0;
     color: var(--text);
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", "Hiragino Sans", "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    /* background-image: linear-gradient(var(--grad-angle),
-            var(--grad-color1) 0%,
-            var(--grad-color1) calc(var(--grad-ratio) * 1% - var(--grad-blend) * 0.5%),
-            var(--grad-color2) calc(var(--grad-ratio) * 1% + var(--grad-blend) * 0.5%),
-            var(--grad-color2) 100%);
-    background-size:
-        cover;
-
-    background-repeat:
-        no-repeat; */
-}
-
-body::before {
-    /* content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image: var(--noise-url);
-    background-size: var(--noise-size);
-    background-repeat: repeat;
-    background-position: var(--noise-x) var(--noise-y);
-    opacity: var(--noise-opacity);
-    mix-blend-mode: var(--noise-blend); */
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
 }
 
 .container {
