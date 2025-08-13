@@ -5,19 +5,24 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MathUtils } from 'three'
 import { useState, useRef, useEffect } from 'react'
-import { useLoader } from '@react-three/fiber'
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader'
+
 
 export default function HoyaModel({ props, pointer }) {
-  const texture = useLoader(RGBELoader, '/aerodynamics_workshop_1k.hdr')
 
   const { scene } = useGLTF('/Hoya.gltf')
   const [rotation, setRotation] = useState({ x: 0, y: 0, z: 0 })
   const { camera } = useThree()
 
+
+  const [backsideOn, setBacksideOn] = useState(false)
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setBacksideOn(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
   const meshRef = useRef()
   const config = useControls('Glass', {
-    backside: false,
     samples: { value: 16, min: 1, max: 32, step: 1 },
     resolution: { value: 512, min: 64, max: 2048, step: 64 },
     transmission: { value: 1, min: 0, max: 1 },
@@ -94,7 +99,7 @@ export default function HoyaModel({ props, pointer }) {
               >
                 <MeshTransmissionMaterial {...config}
                   toneMapped={false}
-                  side={THREE.DoubleSide}
+                  backside={backsideOn}
                 />
               </mesh>
             </Float>

@@ -1,6 +1,5 @@
 import { useMemo, useRef } from 'react'
 import * as THREE from 'three'
-import { LayerMaterial, Depth, Color } from 'lamina'
 import { useControls } from 'leva'
 import { useFrame } from '@react-three/fiber'
 import fractal from '../r3f-gist/shader/cginc/noise/fractal.glsl'
