@@ -15,7 +15,7 @@ const randIn = (rnd, min, max) => min + (max - min) * rnd()
 
 export default function CoinsField({
   count: countProp,
-  fbxPath = '/Bitcoin.fbx',
+  fbxPath = 'Bitcoin.fbx',
   pointer,
   progress,
 }) {
