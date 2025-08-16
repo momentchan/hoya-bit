@@ -8,7 +8,7 @@ import React, { useMemo, useRef } from 'react'
 const smooth5 = (x) => x * x * x * (x * (x * 6 - 15) + 10)
 const clamp01 = (v) => Math.min(1, Math.max(0, v))
 
-export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fbx', pointer, props, progress }) {
+export default function Bitcoin({ params, sharedMatProps, fbxPath = 'Bitcoin.fbx', pointer, props, progress }) {
   const model = useLoader(FBXLoader, fbxPath)
 
   // 單一材質實例（此元件內所有 sub-mesh 共用）
