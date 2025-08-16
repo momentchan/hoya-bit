@@ -122,7 +122,7 @@ body {
 .btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    /* justify-content: center; */
     gap: 8px;
     padding: 10px 14px;
     border-radius: 10px;
@@ -155,7 +155,7 @@ body {
 
 /* Hero */
 .hero {
-    padding: 72px 0 56px;
+    padding: 160px 40px 56px;
 }
 
 .hero-inner {
