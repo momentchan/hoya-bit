@@ -142,7 +142,7 @@ const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
 )
 
   
-export default function HoyaModel({ props, pointer }) {
+export default function HoyaModel({ props, pointer, pos }) {
   const { scene } = useGLTF('Hoya.gltf')
   const glassConfig = useGlassConfig()
   // Extract meshes from the loaded scene
@@ -158,7 +158,7 @@ export default function HoyaModel({ props, pointer }) {
   return (
     <>
       <Float floatIntensity={1} rotationIntensity={0} speed={2}>
-        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 0, 0]}>
+        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={pos}>
           {meshes.map((mesh, i) => (
             <GlassMesh
               key={i}
