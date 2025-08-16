@@ -43,6 +43,7 @@ const useModelAnimation = (pointer) => {
   const meshRef = useRef()
   const spinAngleZ = useRef(0)
   const [backsideOn, setBacksideOn] = useState(false)
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setBacksideOn(true))
@@ -63,7 +64,7 @@ const useModelAnimation = (pointer) => {
     if (Math.abs(spinAngleZ.current) < TOTAL_SPIN_ANGLE) {
       // Initial spin phase
       const remaining = TOTAL_SPIN_ANGLE - Math.abs(spinAngleZ.current)
-      const progress = 1 - remaining / TOTAL_SPIN_ANGLE
+      setProgress(1 - remaining / TOTAL_SPIN_ANGLE)
       const ease = Math.max(0.05, 1 - Math.pow(progress, 1.5))
 
       // Spin
@@ -109,7 +110,7 @@ const useModelAnimation = (pointer) => {
     }
   })
 
-  return { meshRef, backsideOn }
+  return { meshRef, backsideOn, progress }
 }
 
 // Component for the shadow plane
@@ -151,7 +152,7 @@ export default function HoyaModel({ props, pointer }) {
     return arr
   }, [scene])
 
-  const { meshRef, backsideOn } = useModelAnimation(pointer)
+  const { meshRef, backsideOn, progress } = useModelAnimation(pointer)
 
 
   return (
@@ -169,7 +170,7 @@ export default function HoyaModel({ props, pointer }) {
             />
           ))}
 
-          <CoinsField pointer={pointer} />
+          <CoinsField pointer={pointer} progress={progress} />
         </group>
 
       </Float>

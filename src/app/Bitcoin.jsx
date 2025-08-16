@@ -4,7 +4,11 @@ import { MeshTransmissionMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import React, { useMemo, useRef } from 'react'
 
-export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fbx', pointer, props }) {
+// --- random number ---
+const smooth5 = (x) => x * x * x * (x * (x * 6 - 15) + 10)
+const clamp01 = (v) => Math.min(1, Math.max(0, v))
+
+export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fbx', pointer, props, progress }) {
   const model = useLoader(FBXLoader, fbxPath)
 
   // 單一材質實例（此元件內所有 sub-mesh 共用）
@@ -33,6 +37,7 @@ export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fb
   const offset = useMemo(() => new THREE.Vector3(), [])
   const tmpQuat = useMemo(() => new THREE.Quaternion(), [])
   const orbitQuat = useMemo(() => new THREE.Quaternion(), [])
+  const eased = useRef(0)
 
   useFrame((state, delta) => {
     const t = state.clock.getElapsedTime()
@@ -47,12 +52,16 @@ export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fb
     const tilt = params.tiltAmplitude * Math.sin(t * params.tiltSpeed)
     currentAxis.copy(baseAxisZ).applyQuaternion(tmpQuat.setFromAxisAngle(tiltAxis, tilt)).normalize()
 
+    const p = clamp01(progress ?? 0)
+    eased.current = smooth5(p)
+
+
     // 公轉
     angle.current += params.speed * delta
     baseVec
       .set(1, 0, 0)
       .applyQuaternion(orbitQuat.setFromAxisAngle(currentAxis, angle.current))
-    offset.copy(baseVec).multiplyScalar(params.radius)
+    offset.copy(baseVec).multiplyScalar(params.radius * THREE.MathUtils.lerp(1e-4, 1, eased.current))
     offset.y += Math.sin(angle.current * 2.0) * params.radius * params.bobIntensity
 
     if (orbitRef.current) orbitRef.current.position.copy(offset)
@@ -75,7 +84,7 @@ export default function Bitcoin({ params, sharedMatProps, fbxPath = '/Bitcoin.fb
   return (
     <group ref={groupRef} {...props}>
       <group ref={orbitRef}>
-        <group ref={coinRef} scale={[params.scale, params.scale, params.scale]}>
+        <group ref={coinRef} scale={[params.scale * THREE.MathUtils.lerp(1e-4, 1, eased.current), params.scale * THREE.MathUtils.lerp(1e-4, 1, eased.current), params.scale * THREE.MathUtils.lerp(1e-4, 1, eased.current)]}>
           {geos.map((g, i) => (
             <mesh key={i} geometry={g} castShadow receiveShadow>
               {material}

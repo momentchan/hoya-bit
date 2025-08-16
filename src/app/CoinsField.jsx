@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { useControls, folder } from 'leva'
 import Bitcoin from './Bitcoin'
 
-// --- 穩定亂數（可重現）---
 function mulberry32(seed) {
   return function () {
     let t = (seed += 0x6d2b79f5)
@@ -18,7 +17,9 @@ export default function CoinsField({
   count: countProp,
   fbxPath = '/Bitcoin.fbx',
   pointer,
+  progress,
 }) {
+
   const leva = useControls('Coins', {
     count: { value: countProp ?? 3, min: 1, max: 5, step: 1 },
     Orbit: folder({
@@ -63,7 +64,8 @@ export default function CoinsField({
     color: leva.color,
   }), [leva])
 
-  // —— 等分相位 + 隨機自轉 —— //
+  // —— Evenly distributed phase + random spin —— //
+  
   const paramsList = useMemo(() => {
     const list = []
     const baseCenter = new THREE.Vector3(0, 0, 0)
@@ -72,10 +74,11 @@ export default function CoinsField({
     for (let i = 0; i < leva.count; i++) {
       const phase = (i / Math.max(1, leva.count)) * Math.PI * 2
 
-      // 每顆的自轉：基礎值 ± jitter（允許負值 => 方向隨機）
+      // spin: base value ± jitter (allow negative value => random direction)
       const sx = leva.spinX + randIn(rnd, -leva.spinJitter, leva.spinJitter)
       const sy = leva.spinY + randIn(rnd, -leva.spinJitter, leva.spinJitter)
       const sz = leva.spinZ + randIn(rnd, -leva.spinJitter, leva.spinJitter)
+
 
       list.push({
         center: baseCenter,
@@ -101,6 +104,7 @@ export default function CoinsField({
         <Bitcoin
           key={i}
           params={p}
+          progress={progress}
           sharedMatProps={sharedMatProps}
           fbxPath={fbxPath}
           pointer={pointer}
