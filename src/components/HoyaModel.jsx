@@ -143,7 +143,7 @@ const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
 
   
 export default function HoyaModel({ props, pointer }) {
-  const { scene } = useGLTF('/Hoya.gltf')
+  const { scene } = useGLTF('Hoya.gltf')
   const glassConfig = useGlassConfig()
   // Extract meshes from the loaded scene
   const meshes = useMemo(() => {

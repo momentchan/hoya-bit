@@ -1,11 +1,11 @@
 import { Canvas } from '@react-three/fiber'
 import Utilities from "../r3f-gist/utility/Utilities";
-import HoyaModel from "./HoyaModel";
+import HoyaModel from "../components/HoyaModel";
 import { Suspense, useEffect } from "react";
 import { useState } from "react";
 import Effect from "./Effect";
 import * as THREE from 'three'
-import BackgroundFullScreen from './BackgroundFullScreen'
+import BackgroundFullScreen from '../components/BackgroundFullScreen'
 import EnvironmentSetup from './EnvironmentSetup'
 import LevaWraper from '../r3f-gist/utility/LevaWraper'
 
