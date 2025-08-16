@@ -23,7 +23,7 @@ export default function App() {
     }, [])
 
     return <>
-        <LevaWraper defaultHidden={true} />
+        {/* <LevaWraper defaultHidden={true} /> */}
 
         
         <Canvas

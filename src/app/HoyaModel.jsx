@@ -5,7 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MathUtils } from 'three'
 import { useState, useRef, useEffect, useMemo, useLayoutEffect } from 'react'
-
+import CoinsField from './CoinsField'
 // Utility functions
 const smooth5 = (x) => x * x * x * (x * (x * 6 - 15) + 10)
 
@@ -35,7 +35,7 @@ const useGlassConfig = () => {
     attenuationDistance: { value: 0.5, min: 0, max: 10, step: 0.01 },
     attenuationColor: '#ffffff',
     color: '#ffffff',
-  })
+  }, { collapsed: true })
 }
 
 // Custom hook for model rotation logic
@@ -140,6 +140,7 @@ const GlassMesh = ({ mesh, config, backsideOn, meshRef }) => (
   </Float>
 )
 
+  
 export default function HoyaModel({ props, pointer }) {
   const { scene } = useGLTF('/Hoya.gltf')
   const glassConfig = useGlassConfig()
@@ -156,7 +157,7 @@ export default function HoyaModel({ props, pointer }) {
   return (
     <>
       <Float floatIntensity={1} rotationIntensity={0} speed={2}>
-        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 1, 0]}>
+        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={[0.5, 0, 0]}>
           {meshes.map((mesh, i) => (
             <GlassMesh
               key={i}
@@ -164,9 +165,13 @@ export default function HoyaModel({ props, pointer }) {
               config={glassConfig}
               backsideOn={backsideOn}
               meshRef={meshRef}
+              position={[0, 0, 0]}
             />
           ))}
+
+          <CoinsField pointer={pointer} />
         </group>
+
       </Float>
       <ShadowPlane />
     </>

@@ -15,12 +15,7 @@
 	"nodes":[
 		{
 			"mesh":0,
-			"name":"HOYA-BIT-Logo-1024x1024-2-03-1024x479.001",
-			"translation":[
-				-0.09155149012804031,
-				0.020834673196077347,
-				0.9804148077964783
-			]
+			"name":"HOYA-BIT-Logo-1024x1024-2-03-1024x479.001"
 		}
 	],
 	"materials":[
@@ -70,7 +65,7 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":17508,
+			"count":17510,
 			"max":[
 				0.42889711260795593,
 				0.0999990701675415,
@@ -86,13 +81,13 @@
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":17508,
+			"count":17510,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":17508,
+			"count":17510,
 			"type":"VEC2"
 		},
 		{
@@ -105,26 +100,26 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":210096,
+			"byteLength":210120,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":210096,
-			"byteOffset":210096,
+			"byteLength":210120,
+			"byteOffset":210120,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":140064,
-			"byteOffset":420192,
+			"byteLength":140080,
+			"byteOffset":420240,
 			"target":34962
 		},
 		{
 			"buffer":0,
 			"byteLength":59208,
-			"byteOffset":560256,
+			"byteOffset":560320,
 			"target":34963
 		}
 	],
@@ -138,7 +133,7 @@
 	],
 	"buffers":[
 		{
-			"byteLength":619464,
+			"byteLength":619528,
 			"uri":"Hoya.bin"
 		}
 	]
