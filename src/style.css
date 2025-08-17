@@ -125,10 +125,11 @@ body {
     /* justify-content: center; */
     gap: 8px;
     padding: 10px 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
+    border-radius: 12px;
+    border: 1px solid #ffffff;
     background: #fff;
-    font-weight: 600;
+    /* font-weight: 600; */
+    /* letter-spacing: 0.3em; */
     font-size: 14px;
 }
 
@@ -143,8 +144,8 @@ body {
 }
 
 .btn-outline {
-    color: #111;
-    background: #fff;
+    color: #ffffff;
+    background: none;
 }
 
 .btn-black {
@@ -167,6 +168,13 @@ body {
 .hero-left {
     flex: 0 0 520px;
 }
+
+.hero-left img {
+    width:300px;
+    height:auto;
+    margin-bottom:32px;
+}
+
 
 .h1 {
     margin: 40px 0 24px;
@@ -192,7 +200,12 @@ body {
 .btn-lg {
     padding: 12px 22px;
     font-size: 16px;
-    border-radius: 10px;
+    border-radius: 12px;
+    letter-spacing: 4px;
+}
+
+.menu{
+    display: none;
 }
 
 @media (max-width: 900px) {
@@ -211,4 +224,28 @@ body {
     .h2 {
         font-size: 32px;
     }
+
+    .primary-nav {display: none;}
+
+    .mb {display: none;}
+
+    .menu{
+    display: block;
+    }
+    .actions{
+    margin-right: 16px;
+    }
+
+    .hero-left img {
+    width: 260px;
+    }
+
+    .cta-row{
+    display: none;
+    }
+
+    .hero {
+    padding: 60px 40px 56px;
+    }
+
 }

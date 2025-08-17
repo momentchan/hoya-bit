@@ -41,7 +41,7 @@ export default function App() {
         >
             <Suspense fallback={null}>
                 <Utilities />
-                <HoyaModel pointer={pointer} pos={isMobile ? [0, 0, 0] : [0.5, 0, 0]} />
+                <HoyaModel pointer={pointer} pos={isMobile ? [0, -0.3, 0] : [0.5, 0, 0]} />
                 <EnvironmentSetup />
                 <BackgroundFullScreen />
                 <Effect />
