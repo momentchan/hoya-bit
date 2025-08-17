@@ -156,9 +156,9 @@ export default function HoyaModel({ props, pointer, pos }) {
 
 
   return (
-    <>
+    <group position={pos}>
       <Float floatIntensity={1} rotationIntensity={0} speed={2}>
-        <group {...props} rotation={[Math.PI / 2, 0, 0]} position={pos}>
+        <group {...props} rotation={[Math.PI / 2, 0, 0]} >
           {meshes.map((mesh, i) => (
             <GlassMesh
               key={i}
@@ -172,9 +172,8 @@ export default function HoyaModel({ props, pointer, pos }) {
 
           <CoinsField pointer={pointer} progress={progress} />
         </group>
-
       </Float>
       <ShadowPlane />
-    </>
+    </group>
   )
 }
